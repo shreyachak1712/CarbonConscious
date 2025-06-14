@@ -1,3 +1,4 @@
+// Refactored FoodPage using servings instead of kg
 import 'package:flutter/material.dart';
 
 class FoodPage extends StatefulWidget {
@@ -9,41 +10,42 @@ class FoodPage extends StatefulWidget {
 
 class _FoodPageState extends State<FoodPage> {
   final List<Map<String, dynamic>> _foodEntries = [
-    {'category': 'Meat (Beef)', 'quantity': 0.0},
+    {'category': 'Milk (1 glass)', 'servings': 1, 'date': DateTime.now(),},
   ];
 
-  final Map<String, double> _emissionFactors = {
-    'Meat (Beef)': 27.0,         // kg CO₂e per kg
-    'Meat (Lamb)': 39.2,
-    'Meat (Pork)': 12.1,
-    'Meat (Chicken)': 6.9,
-    'Fish': 5.4,
-    'Dairy (Milk)': 1.9,
-    'Dairy (Cheese)': 13.5,
-    'Dairy (Yogurt)': 2.2,
-    'Eggs': 4.8,
-    'Vegetables': 2.0,
-    'Fruits': 1.1,
-    'Grains (Rice, Wheat)': 2.7,
-    'Beverages (Coffee)': 16.5,
-    'Beverages (Tea)': 1.4,
-    'Processed Foods': 7.0,
-    'Fast Food': 6.1,
+  // Emission factors per serving (kg CO2e)
+  final Map<String, double> _emissionsPerServing = {
+    'Milk (1 glass)': 0.48,
+    'Cheese (1 slice)': 0.54,
+    'Yogurt (1 cup)': 0.44,
+    'Egg (1)': 0.24,
+    'Beef (1 portion)': 4.05,
+    'Chicken (1 portion)': 1.04,
+    'Fish (1 portion)': 0.81,
+    'Pork (1 portion)': 1.82,
+    'Lamb (1 portion)': 5.88,
+    'Vegetables (1 serving)': 0.20,
+    'Fruits (1 serving)': 0.11,
+    'Grains (1 cup cooked)': 0.35,
+    'Coffee (1 cup)': 0.34,
+    'Tea (1 cup)': 0.07,
+    'Processed Food (1 pack)': 0.70,
+    'Fast Food (1 meal)': 1.83,
   };
 
   double calculateTotalEmissions() {
     double total = 0.0;
     for (var entry in _foodEntries) {
       String category = entry['category'];
-      double quantity = entry['quantity'];
-      total += quantity * (_emissionFactors[category] ?? 0.0);
+      int servings = entry['servings'];
+      total += servings * (_emissionsPerServing[category] ?? 0.0);
     }
     return total;
   }
 
   void _addEntry() {
     setState(() {
-      _foodEntries.add({'category': 'Meat (Beef)', 'quantity': 0.0});
+      _foodEntries.add({'category': 'Milk (1 glass)', 'servings': 1});
     });
   }
 
@@ -81,7 +83,7 @@ class _FoodPageState extends State<FoodPage> {
                               labelText: 'Food Category',
                               border: OutlineInputBorder(),
                             ),
-                            items: _emissionFactors.keys.map((String value) {
+                            items: _emissionsPerServing.keys.map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(value),
@@ -95,16 +97,54 @@ class _FoodPageState extends State<FoodPage> {
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
+                            initialValue: _foodEntries[index]['servings'].toString(),
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                              labelText: 'Quantity Consumed (kg)',
+                              labelText: 'Number of Servings',
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (val) {
                               setState(() {
-                                _foodEntries[index]['quantity'] = double.tryParse(val) ?? 0.0;
+                                _foodEntries[index]['servings'] = int.tryParse(val) ?? 0;
                               });
                             },
+                          ),
+                          const SizedBox(height: 10),
+                          InkWell(
+                            onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _foodEntries[index]['date'] ?? DateTime.now(),
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                            setState(() {
+                            _foodEntries[index]['date'] = picked;
+                            });
+                            }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.calendar_month),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _foodEntries[index]['date'] == null
+                                        ? 'Select Date'
+                                        : 'Date: ${_foodEntries[index]['date'].toString().split(' ')[0]}',
+                                    ),
+                                  ],
+                                ),
+                              ) 
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Align(

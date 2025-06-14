@@ -59,7 +59,7 @@ class _TravelPageState extends State<TravelPage> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(),
     );
 
     if (selectedDate != null) {
@@ -180,7 +180,7 @@ class _TravelPageState extends State<TravelPage> {
                               context: context,
                               initialDate: entry.startDate ?? DateTime.now(),
                               firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
+                              lastDate: DateTime.now(),
                             );
                             if (picked != null) {
                               setState(() {
@@ -208,7 +208,7 @@ class _TravelPageState extends State<TravelPage> {
                               context: context,
                               initialDate: entry.endDate ?? DateTime.now(),
                               firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
+                              lastDate: DateTime.now(),
                             );
                             if (picked != null) {
                               setState(() {

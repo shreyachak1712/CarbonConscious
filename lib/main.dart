@@ -1,4 +1,4 @@
-import 'package:carbon_footprint_tracker/shopping_page.dart';
+import 'shopping_page.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
@@ -6,7 +6,6 @@ import 'home_dashboard.dart';
 import 'travel_emissions_page.dart';
 import 'food_page.dart'; 
 import 'electricity_page.dart';
-import 'shopping_page.dart';
 
 void main() {
   runApp(const MyApp());
