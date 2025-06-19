@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'signup_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'home_dashboard.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,17 +22,25 @@ class _LoginPageState extends State<LoginPage> {
           // 🔽 Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/forest_background.jpg', // 👉 Make sure this path is correct
+              'assets/images/forest_background.jpg',
               fit: BoxFit.cover,
             ),
           ),
 
-          // 🔼 Semi-transparent overlay (optional, improves text readability)
+          // 🔼 Gradient Overlay (more elegant than white opacity)
           Positioned.fill(
-           child: Container(
-            // ignore: deprecated_member_use
-            color: Colors.white.withOpacity(0.65),
-           ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.9),
+                    Colors.white.withOpacity(0.6),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
           ),
 
           // 🔼 Login Form
@@ -41,25 +49,60 @@ class _LoginPageState extends State<LoginPage> {
             child: ListView(
               children: [
                 const SizedBox(height: 40),
-                Icon(Icons.eco_outlined, size: 90, color: Colors.green.shade800),
-                const SizedBox(height: 20),
+
+                // Logo Icon
                 Center(
-                  child: Text(
-                    "Welcome Back!",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade900,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green.shade100.withOpacity(0.4),
+                    ),
+                    child: Icon(
+                      Icons.eco_outlined,
+                      size: 90,
+                      color: Colors.green.shade800,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+
+                const SizedBox(height: 20),
+
+                // Branding and Intro Text
                 Center(
-                  child: Text(
-                    "Login to continue tracking your footprint.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                  child: Column(
+                    children: [
+                      Text(
+                        "CarbonConscious",
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                          color: Colors.green.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Welcome Back!",
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green.shade900,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Login to continue tracking your footprint.",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 40),
 
                 // Email Field
@@ -97,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 30),
 
                 // Login Button
@@ -109,36 +153,40 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green.shade800,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Login",
-                    style: TextStyle(fontSize: 18),
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // Sign Up Redirect
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const SignupPage()),
-                        );
+                    Text(
+                      "Don't have an account? ",
+                      style: GoogleFonts.poppins(),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/signup');
                       },
                       child: Text(
-                        "Sign up",
-                        style: TextStyle(
-                          color: Colors.green.shade800,
+                        'Sign Up',
+                        style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
+                          color: Colors.green.shade800,
                         ),
                       ),
                     ),

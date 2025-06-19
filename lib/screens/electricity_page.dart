@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_drawer.dart';
 import 'dart:math';
 
 class ElectricityPage extends StatefulWidget {
@@ -63,6 +64,7 @@ class _ElectricityPageState extends State<ElectricityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         title: const Text('Electricity Emissions'),
         backgroundColor: Colors.green[700],

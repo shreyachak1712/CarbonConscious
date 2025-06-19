@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_drawer.dart';
 
 class ShoppingPage extends StatefulWidget {
   const ShoppingPage({super.key});
@@ -89,6 +90,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         title: const Text("Shopping Emissions"),
         backgroundColor: Colors.green[700],

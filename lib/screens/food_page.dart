@@ -1,5 +1,6 @@
 // Refactored FoodPage using servings instead of kg
 import 'package:flutter/material.dart';
+import '../widgets/custom_drawer.dart';
 
 class FoodPage extends StatefulWidget {
   const FoodPage({super.key});
@@ -58,6 +59,7 @@ class _FoodPageState extends State<FoodPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         title: const Text('Track Food Consumption'),
         backgroundColor: Colors.green[700],

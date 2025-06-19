@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_drawer.dart';
 
 class HomeDashboard extends StatelessWidget {
   const HomeDashboard({super.key});
@@ -7,6 +8,7 @@ class HomeDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green[50],
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.green[700],
         title: const Text("Carbon Tracker"),
