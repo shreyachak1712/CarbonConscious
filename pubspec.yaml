@@ -31,7 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
-  intl: ^0.18.1  # or the latest version available
+  intl: ^0.18.1
+  percent_indicator: ^4.2.3 # or the latest version available
 
 
 
@@ -68,6 +69,10 @@ flutter:
   
   assets:
     - assets/images/forest_background.jpg
+    - assets/images/travel.webp
+    - assets/images/food image.jpg
+    - assets/images/electricity image.webp
+    - assets/images/shopping image.jpg
 
 
   # To add assets to your application, add an assets section, like this:

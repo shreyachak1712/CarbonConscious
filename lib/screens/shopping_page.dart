@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../widgets/custom_drawer.dart';
+
+class ShoppingItem {
+  String category;
+  String itemName;
+  int quantity;
+  double cost;
+
+  ShoppingItem({
+    required this.category,
+    this.itemName = '',
+    this.quantity = 1,
+    this.cost = 0.0,
+  });
+}
 
 class ShoppingPage extends StatefulWidget {
   const ShoppingPage({super.key});
@@ -9,15 +24,7 @@ class ShoppingPage extends StatefulWidget {
 }
 
 class _ShoppingPageState extends State<ShoppingPage> {
-  final List<Map<String, dynamic>> _items = [
-    {
-      'category': 'Clothing',
-      'item': '',
-      'quantity': '',
-      'price': '',
-    },
-  ];
-
+  final Map<String, List<ShoppingItem>> _monthlyEntries = {};
   final List<String> _categories = [
     'Clothing',
     'Electronics',
@@ -34,7 +41,6 @@ class _ShoppingPageState extends State<ShoppingPage> {
     'Miscellaneous',
   ];
 
-  // CO₂ per ₹1000 spent in different categories (kg CO₂ / ₹1000)
   final Map<String, double> _emissionFactors = {
     'Clothing': 25.0,
     'Electronics': 50.0,
@@ -51,40 +57,167 @@ class _ShoppingPageState extends State<ShoppingPage> {
     'Miscellaneous': 15.0,
   };
 
-  double _totalEmissions = 0.0;
-
-  void _calculateTotalEmissions() {
-    double total = 0.0;
-
-    for (var item in _items) {
-      final category = item['category'];
-      final price = double.tryParse(item['price']) ?? 0.0;
-      final factor = _emissionFactors[category] ?? 0.0;
-
-      total += (price / 1000.0) * factor;
+  void _addNewMonth() async {
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (selectedDate != null) {
+      final monthKey = DateFormat('MMMM yyyy').format(selectedDate);
+      if (!_monthlyEntries.containsKey(monthKey)) {
+        setState(() {
+          _monthlyEntries[monthKey] = [
+            ShoppingItem(category: 'Clothing'),
+          ];
+        });
+      }
     }
+  }
 
+  void _addItem(String month) {
     setState(() {
-      _totalEmissions = total;
+      _monthlyEntries[month]?.add(ShoppingItem(category: 'Clothing'));
     });
   }
 
-  void _addItem() {
+  void _removeItem(String month, int index) {
     setState(() {
-      _items.add({
-        'category': 'Clothing',
-        'item': '',
-        'quantity': '',
-        'price': '',
-      });
+      _monthlyEntries[month]?.removeAt(index);
     });
   }
 
-  void _removeItem(int index) {
-    setState(() {
-      _items.removeAt(index);
-      _calculateTotalEmissions();
+  double _calculateEmissionsForItem(ShoppingItem item) {
+    final factor = _emissionFactors[item.category] ?? 0.0;
+    return ((item.cost * item.quantity) / 1000.0) * factor;
+  }
+
+  double _calculateTotalEmissions() {
+    double total = 0.0;
+    _monthlyEntries.forEach((month, items) {
+      for (var item in items) {
+        total += _calculateEmissionsForItem(item);
+      }
     });
+    return total;
+  }
+
+  Widget _buildMonthSection(String month, List<ShoppingItem> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            month,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        ...items.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category
+                  DropdownButtonFormField<String>(
+                    value: item.category,
+                    items: _categories.map((category) {
+                      return DropdownMenuItem(value: category, child: Text(category));
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        item.category = value!;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      labelText: "Category",
+                      prefixIcon: Icon(Icons.category),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Item Name
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Item Name",
+                      prefixIcon: Icon(Icons.shopping_bag),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      item.itemName = value;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Quantity
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Quantity",
+                      prefixIcon: Icon(Icons.format_list_numbered),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        item.quantity = int.tryParse(value) ?? 1;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Cost
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Cost per Item (₹)",
+                      prefixIcon: Icon(Icons.currency_rupee),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        item.cost = double.tryParse(value) ?? 0.0;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Remove Button
+                  if (items.length > 1)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => _removeItem(month, index),
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        label: const Text("Remove", style: TextStyle(color: Colors.red)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }),
+
+        // Add Item Button
+        Align(
+          alignment: Alignment.centerRight,
+          child: ElevatedButton.icon(
+            onPressed: () => _addItem(month),
+            icon: const Icon(Icons.add),
+            label: const Text("Add Item for this Month"),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700]),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 
   @override
@@ -100,122 +233,39 @@ class _ShoppingPageState extends State<ShoppingPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text(
-              "Enter your shopping details below:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
-
-            Expanded(
-              child: ListView.builder(
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  final item = _items[index];
-
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          DropdownButtonFormField<String>(
-                            value: item['category'],
-                            items: _categories.map((String category) {
-                              return DropdownMenuItem(
-                                value: category,
-                                child: Text(category),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                item['category'] = value!;
-                              });
-                              _calculateTotalEmissions();
-                            },
-                            decoration: const InputDecoration(
-                              labelText: "Category",
-                              prefixIcon: Icon(Icons.category),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: "Item Name",
-                              prefixIcon: Icon(Icons.shopping_bag),
-                            ),
-                            onChanged: (value) {
-                              item['item'] = value;
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: "Quantity",
-                              prefixIcon: Icon(Icons.format_list_numbered),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              item['quantity'] = value;
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: "Price (₹)",
-                              prefixIcon: Icon(Icons.currency_rupee),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              item['price'] = value;
-                              _calculateTotalEmissions();
-                            },
-                          ),
-                          const SizedBox(height: 6),
-                          if (_items.length > 1)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () => _removeItem(index),
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                label: const Text("Remove", style: TextStyle(color: Colors.red)),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 10),
             ElevatedButton.icon(
-              onPressed: _addItem,
-              icon: const Icon(Icons.add),
-              label: const Text("Add Item"),
+              onPressed: _addNewMonth,
+              icon: const Icon(Icons.calendar_month),
+              label: const Text("Add New Month"),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700]),
             ),
-
             const SizedBox(height: 20),
+            Expanded(
+              child: ListView(
+                children: _monthlyEntries.entries
+                    .map((entry) => _buildMonthSection(entry.key, entry.value))
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Final Total
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.green[200],
                 borderRadius: BorderRadius.circular(12),
               ),
-              width: double.infinity,
               child: Column(
                 children: [
                   const Text(
-                    "Estimated Emissions from Shopping:",
+                    "Total Emissions from Shopping",
                     style: TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "${_totalEmissions.toStringAsFixed(2)} kg CO₂",
+                    "${_calculateTotalEmissions().toStringAsFixed(2)} kg CO₂",
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.green[900],
                     ),
